@@ -1,0 +1,22 @@
+
+interval = 30
+
+[inputs]
+  [inputs.weblogs]
+  location = "./logs"
+  parser = "csv"
+  output = "influxdb"
+
+  [inputs.healthcheck]
+  location = "localhost/healthcheck"
+  parser = "http"
+  output = "traces"
+
+[outputs]
+  [outputs.influxdb]
+  endpoint = "http://influxdb:9876"
+
+  [outputs.appinsights]
+  instrumentationkey = "my-key"
+    [outputs.appinsights.traces]
+    table = "traces"

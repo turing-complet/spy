@@ -1,0 +1,28 @@
+{
+  "inputs": {
+    "weblogs": {
+      "location": "./logs",
+      "type": "textfile",
+      "output": "console"
+    },
+    "healthcheck": {
+      "location": "localhost/healthcheck",
+      "type": "http",
+      "output": "traces"
+    }
+  },
+  "outputs": {
+	"influxdb": {
+		"type": "influx",
+		"endpoint": "http://influxdb:9876"
+	},
+	"traces": {
+		"type": "appinsights",
+		"instrumentationkey": "my-key",
+		"traces": {
+			"table": "traces"
+		}
+	},
+	"console": {}
+  }
+}

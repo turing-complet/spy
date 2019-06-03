@@ -2,6 +2,8 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 using spy.format;
 using spy.input;
@@ -14,32 +16,44 @@ namespace spy
     // how to connect with buffers
     // just map the common fields between an input and output
     // where should spy itself write logs?
-    // toml config
     // should still add transformations
-    // base input/ouput classes for thread start, managing buffer, etc
-    // write pipeline.Run() first to see what interfaces should look like
-    // chain output to input as a handler. multiple outputs => use "compound" action
     class Program
     {
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
+            //GetInputs();
+            //StartPipeline();
 
-            var fields = new HashSet<string> { "timestamp", "level", "msg" };
-            // pipeline.AddInput(new CsvInput("./logs.txt", fields));
-            // pipeline.AddOutput(new AppInsights("instrumentation-key"));
-            // pipeline.AddOutput(new ConsoleOutput());
-            // pipeline.Run();
+            var config = Config.LoadFrom(@"C:\code\spy\spy\example.json");
+            var errors = config.Validate();
 
-            var watcher = new FileInput("/home/jon/code/spy/test.txt", fields);
+            Console.Read();
+            
+        }
+
+
+        static void StartPipeline()
+        {
+            var watcher = new FileInput(@"C:\code\spy\spy\test.txt");
             var consoleOut = new ConsoleOutput();
 
             var q = new ConcurrentQueue<StringFormat>();
             watcher.Start((string s) => q.Enqueue(s));
             consoleOut.Start(q);
+        }
 
-            Console.Read();
-            
+        static void GetInputs()
+        {
+            var types = Assembly.GetExecutingAssembly().GetTypes()
+                .SelectMany(t => t.GetCustomAttributes())
+                .Where(t => t.GetType() == typeof(SpyInput))
+                .Select(t => ((SpyInput)t).name);
+
+            foreach (var t in types)
+            {
+                Console.WriteLine(t);
+            }
         }
     }
 

@@ -34,16 +34,15 @@ namespace spy
 
     }
 
-    public class InputPlugin
+    public class InputPlugin : Plugin
     {
-        public string Type { get; set; }
-        public string Location { get; set; }
         public string Output { get; set; }
     }
 
-    public class OutputPlugin
+    public class OutputPlugin : Plugin { }
+
+    public class Plugin : Dictionary<string, object>
     {
-        public string Type { get; set; }
-        public Dictionary<string, string> Settings { get; set; }
+        public string Type { get; set; } // textfile, http, console, etc
     }
 }

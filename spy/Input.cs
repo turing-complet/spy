@@ -11,7 +11,6 @@ namespace spy.input
 {
     public interface IInput<T>
     {
-        Dictionary<string, string> Settings { get; set; }
         void Start(Action<T> handler);
     }
 
@@ -25,12 +24,16 @@ namespace spy.input
     {
         private string _path;
 
+        [SpySetting(name = "path", description = "path to file to watch")]
+        public string LogFile { get; set; }
+
+        [SpySetting(name = "interval", description = "polling interval")]
+        public int Interval { get; set; } = 10;
+
         public FileInput(string fullPath)
         {
             _path = fullPath;
         }
-
-        public Dictionary<string, string> Settings { get; set; }
 
         public void Start(Action<string> handler)
         {
@@ -43,18 +46,18 @@ namespace spy.input
             fsw.Filter = Path.GetFileName(_path);
             fsw.EnableRaisingEvents = true;
             fsw.Changed += (s,e) => wh.Set();
-
+            Console.WriteLine($"First time on thread id = {Thread.CurrentThread.ManagedThreadId}");
             var fs = new FileStream(_path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             using (var sr = new StreamReader(fs))
             {
-                var s = "";
+                string line;
                 while (true)
                 {
-                    s = sr.ReadLine();
-                    if (s != null)
-                        handler(s);
+                    line = sr.ReadLine();
+                    if (!string.IsNullOrEmpty(line))
+                        handler(line);
                     else
-                        wh.WaitOne(1000);
+                        wh.WaitOne(Interval);
                 }
             }
         }

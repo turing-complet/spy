@@ -27,7 +27,9 @@ namespace spy
 
             var config = Config.LoadFrom(@"C:\code\spy\spy\example.json");
             var errors = config.Validate();
+            if (errors.Any()) throw new ConfigException(errors);
 
+            var pipeline = new Pipeline(config);
             Console.Read();
             
         }

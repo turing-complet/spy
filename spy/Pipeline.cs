@@ -36,12 +36,8 @@ namespace spy
 
         private void SetProperty(object instance, InputPlugin settings, PropertyInfo prop)
         {
-            SetValue(prop, instance, settings[prop.Name]);
-        }
-
-        private void SetValue(PropertyInfo prop, object instance, object value)
-        {
-            prop.SetValue(instance, Convert.ChangeType(value, prop.PropertyType));
+            object configValue = settings[prop.Name];
+            prop.SetValue(instance, Convert.ChangeType(configValue, prop.PropertyType));
         }
 
         private static IEnumerable<PropertyInfo> GetSettingsForPlugin(Type inputType)
@@ -59,7 +55,7 @@ namespace spy
                 var attr = type.GetCustomAttributes(attrType, true).FirstOrDefault();
                 if (attr != null)
                 {
-                    yield return (type, (string) type.GetProperty("name").GetValue(attr));
+                    yield return (type, (string) attrType.GetField("name").GetValue(attr));
                 }
             }
         }

@@ -30,9 +30,9 @@ namespace spy.input
         [SpySetting(name = "interval", description = "polling interval")]
         public int Interval { get; set; } = 10;
 
-        public FileInput(string fullPath)
+        public FileInput()
         {
-            _path = fullPath;
+            _path = LogFile;
         }
 
         public void Start(Action<string> handler)

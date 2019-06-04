@@ -37,7 +37,7 @@ namespace spy
 
         static void StartPipeline()
         {
-            var watcher = new FileInput(@"C:\code\spy\spy\test.txt");
+            var watcher = new FileInput { LogFile = @"C:\code\spy\spy\test.txt" };
             var consoleOut = new ConsoleOutput();
 
             var q = new ConcurrentQueue<StringFormat>();

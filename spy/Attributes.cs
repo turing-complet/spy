@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Reflection;
+using System.Linq;
 
 namespace spy
 {
@@ -21,5 +23,21 @@ namespace spy
     {
         public string name;
         public string description;
+    }
+
+    public static class AttributeExtensions
+    {
+        public static IEnumerable<(Type type, string name)> GetMatchingTypes(this Type attrType)
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            foreach (Type type in assembly.GetTypes())
+            {
+                var attr = type.GetCustomAttributes(attrType, true).FirstOrDefault();
+                if (attr != null)
+                {
+                    yield return (type, (string) attrType.GetField("name").GetValue(attr));
+                }
+            }
+        }
     }
 }

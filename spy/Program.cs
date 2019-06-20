@@ -41,10 +41,11 @@ namespace spy
             var consoleOut = new ConsoleOutput();
 
             var q = new ConcurrentQueue<StringFormat>();
-            watcher.Start((string s) => q.Enqueue(s));
+            watcher.Start((StringFormat s) => q.Enqueue(s));
             consoleOut.Start(q);
         }
 
+        // convert to --help
         static void GetInputs()
         {
             var types = Assembly.GetExecutingAssembly().GetTypes()

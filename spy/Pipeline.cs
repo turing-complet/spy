@@ -11,11 +11,13 @@ namespace spy
     // TODO: export config from running pipeline?
     public class Pipeline
     {
-        private List<IInput<IFormat>> inputs;
+        private Dictionary<IInput<IFormat>, ConcurrentQueue<IFormat>> _inputs;
+        private Dictionary<ConcurrentQueue<IFormat>, IInput<IFormat>> _outputs;
+        
         public Pipeline(Config config)
         {
-            var inputs = new List<IInput<IFormat>>();
-            var inputInfo = GetTypesWithAttribute(typeof(SpyInput));
+            var _inputs = new List<IInput<IFormat>>();
+            var inputInfo = typeof(SpyInput).GetMatchingTypes();
             foreach(var info in inputInfo)
             {
                 var instance = Activator.CreateInstance(info.type);
@@ -30,7 +32,17 @@ namespace spy
                     SetProperty(instance, config.Inputs[info.name], prop);
                 }
 
-                inputs.Add((IInput<IFormat>)instance);
+                _inputs.Add((IInput<IFormat>)instance, new ConcurrentQueue<IFormat>());
+            }
+        }
+
+        public void Run()
+        {
+            foreach (var input in _inputs)
+            {
+                var q = _inputs[input]; // does this work, or need to define key
+                input.Start((IFormat s) => q.Enqueue(s));
+                _outputs[q].Start();
             }
         }
 
@@ -45,19 +57,6 @@ namespace spy
             var properties = inputType.GetProperties(BindingFlags.Public)
                 .Where(t => t.CustomAttributes.Any(a => a.AttributeType == typeof(SpySetting)));
             return properties;
-        }
-
-        private static IEnumerable<(Type type, string name)> GetTypesWithAttribute(Type attrType)
-        {
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            foreach (Type type in assembly.GetTypes())
-            {
-                var attr = type.GetCustomAttributes(attrType, true).FirstOrDefault();
-                if (attr != null)
-                {
-                    yield return (type, (string) attrType.GetField("name").GetValue(attr));
-                }
-            }
         }
     }
 }

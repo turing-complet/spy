@@ -27,7 +27,9 @@ namespace spy
 
             var config = Config.LoadFrom(@"C:\code\spy\spy\example.json");
             var errors = config.Validate();
+            if (errors.Any()) throw new ConfigException(errors);
 
+            var pipeline = new Pipeline(config);
             Console.Read();
             
         }
@@ -35,7 +37,7 @@ namespace spy
 
         static void StartPipeline()
         {
-            var watcher = new FileInput(@"C:\code\spy\spy\test.txt");
+            var watcher = new FileInput { LogFile = @"C:\code\spy\spy\test.txt" };
             var consoleOut = new ConsoleOutput();
 
             var q = new ConcurrentQueue<StringFormat>();

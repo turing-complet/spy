@@ -1,8 +1,10 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace spy
@@ -26,7 +28,7 @@ namespace spy
             {
                 if (!Outputs.Keys.Any(o => o == Inputs[key].Output))
                 {
-                    errors.Add($"Input {key} has invalid output type = {Inputs[key].Output}");
+                    errors.Add($"Input {key} has invalid output type = {Inputs[key].Output ?? "null"}");
                 }
             }
             return errors;
@@ -34,16 +36,18 @@ namespace spy
 
     }
 
-    public class InputPlugin
+    public class InputPlugin : Plugin
     {
-        public string Type { get; set; }
-        public string Location { get; set; }
-        public string Output { get; set; }
+        public string Output => (string)this["output"];
     }
 
-    public class OutputPlugin
+    public class OutputPlugin : Plugin { }
+
+    public class Plugin : Dictionary<string, object>
     {
-        public string Type { get; set; }
-        public Dictionary<string, string> Settings { get; set; }
+        //[JsonExtensionData]
+        //public Dictionary<string, object> Settings { get; set; }
+
+        public string Type { get; set; } // textfile, http, console, etc
     }
 }

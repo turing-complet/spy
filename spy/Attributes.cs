@@ -15,4 +15,11 @@ namespace spy
     {
         public string name;
     }
+
+    [AttributeUsage(AttributeTargets.Property)]
+    public class SpySetting : Attribute
+    {
+        public string name;
+        public string description;
+    }
 }

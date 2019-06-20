@@ -10,7 +10,8 @@ namespace spy.output
 {
     public abstract class Output<T> where T:IFormat
     {
-        public Dictionary<string, string> Settings { get; set; }
+        [SpySetting(name = "interval", description = "polling interval")]
+        public int Interval { get; set; } = 10;
         public abstract void Forward(T data);
 
         public void Start(ConcurrentQueue<T> queue)
@@ -24,7 +25,7 @@ namespace spy.output
                     {
                         Forward(entry);
                     }
-                    Thread.Sleep(1000);
+                    Thread.Sleep(Interval);
                 }
             });
         }

@@ -30,6 +30,8 @@ namespace spy
             if (errors.Any()) throw new ConfigException(errors);
 
             var pipeline = new Pipeline(config);
+            pipeline.Run();
+            
             Console.Read();
             
         }

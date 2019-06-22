@@ -4,7 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
+using System.Collections.Concurrent;
+using spy.output;
 
 namespace spy
 {
@@ -12,11 +13,13 @@ namespace spy
     public class Pipeline
     {
         private Dictionary<IInput<IFormat>, ConcurrentQueue<IFormat>> _inputs;
-        private Dictionary<ConcurrentQueue<IFormat>, IInput<IFormat>> _outputs;
+        private Dictionary<ConcurrentQueue<IFormat>, Output<IFormat>> _outputs;
         
         public Pipeline(Config config)
         {
-            var _inputs = new List<IInput<IFormat>>();
+            _inputs = new Dictionary<IInput<IFormat>, ConcurrentQueue<IFormat>>();
+            _outputs = new Dictionary<ConcurrentQueue<IFormat>, Output<IFormat>>();
+
             var inputInfo = typeof(SpyInput).GetMatchingTypes();
             foreach(var info in inputInfo)
             {
@@ -32,17 +35,17 @@ namespace spy
                     SetProperty(instance, config.Inputs[info.name], prop);
                 }
 
-                _inputs.Add((IInput<IFormat>)instance, new ConcurrentQueue<IFormat>());
+                _inputs[(IInput<IFormat>)instance] = new ConcurrentQueue<IFormat>();
             }
         }
 
         public void Run()
         {
-            foreach (var input in _inputs)
+            foreach (var input in _inputs.Keys)
             {
                 var q = _inputs[input]; // does this work, or need to define key
                 input.Start((IFormat s) => q.Enqueue(s));
-                _outputs[q].Start();
+                _outputs[q].Start(q);
             }
         }
 

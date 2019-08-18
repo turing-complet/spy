@@ -9,7 +9,7 @@ using spy.format;
 
 namespace spy.input
 {
-    public interface IInput<T>
+    public interface IInput<out T>
     {
         void Start(Action<T> handler);
     }
@@ -20,7 +20,7 @@ namespace spy.input
     // ctor: new CsvInput((CsvRow row) => { /* doSomethingWith(row); */  })
 
     [SpyInput(name = "textfile")]
-    public class FileInput : IInput<string>
+    public class FileInput : IInput<StringFormat>
     {
         private string _path;
 
@@ -35,11 +35,11 @@ namespace spy.input
             _path = LogFile;
         }
 
-        public void Start(Action<string> handler)
+        public void Start(Action<StringFormat> handler)
         {
             Task.Run(() => _start(handler));
         }
-        public void _start(Action<string> handler)
+        public void _start(Action<StringFormat> handler)
         {
             var wh = new AutoResetEvent(false);
             var fsw = new FileSystemWatcher(Path.GetDirectoryName(_path));

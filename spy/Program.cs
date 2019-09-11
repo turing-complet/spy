@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using CommandLine;
 using spy.format;
 using spy.input;
 using spy.output;
@@ -21,11 +22,25 @@ namespace spy
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
-            //GetInputs();
-            //StartPipeline();
+            Parser.Default.ParseArguments<Options>(args)
+                   .WithParsed<Options>(opt =>
+                   {
+                       if (opt.Help)
+                       {
+                           GetInputs();
+                       }
+                       else
+                       {
+                           Run(opt);
+                       }
+                   });
+        }
 
-            var config = Config.LoadFrom(@"C:\code\spy\spy\example.json");
+        static void Run(Options options)
+        {
+            //TestPipeline();
+
+            var config = Config.LoadFrom(options.Config);
             var errors = config.Validate();
             if (errors.Any()) throw new ConfigException(errors);
 
@@ -33,11 +48,10 @@ namespace spy
             pipeline.Run();
             
             Console.Read();
-            
         }
 
 
-        static void StartPipeline()
+        static void TestPipeline()
         {
             var watcher = new FileInput { LogFile = @"C:\code\spy\spy\test.txt" };
             var consoleOut = new ConsoleOutput();
@@ -47,7 +61,6 @@ namespace spy
             consoleOut.Start(q);
         }
 
-        // convert to --help
         static void GetInputs()
         {
             var types = Assembly.GetExecutingAssembly().GetTypes()
@@ -60,6 +73,19 @@ namespace spy
                 Console.WriteLine(t);
             }
         }
+    }
+
+    // https://github.com/commandlineparser/commandline
+    public class Options
+    {
+        [Option('h', "help", Required = false, HelpText = "Show help.")]
+        public bool Help { get; set; }
+
+        [Option('c', "config", Required = false, HelpText = "Use config file.")]
+        public string Config { get; set; } = @"C:\code\spy\spy\example.json";
+
+        [Option('v', "verbose", Required = false, HelpText = "Set output to verbose messages. Doesn't do anything yet.")]
+        public bool Verbose { get; set; }
     }
 
 }
